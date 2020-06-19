@@ -2,5 +2,5 @@
 formant grain oscillator cabbage
 
 * install Cabbage (including Csound)
-* start the program, and open prfcon.csd
+* start the program
 * open prfcon.csd

@@ -6,3 +6,4 @@ formant grain oscillator cabbage
 * **IMPORTANT: YOU MUST MODIFY THE FILE Samp.txt**: #define a file macro named Vir66 so Csound can find the raw audio file of the wavetable
 * start the program
 * open prfcon.csd
+* You can now press Play to enjoy the synth, export the program as a standalone, etc.

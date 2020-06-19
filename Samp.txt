@@ -1,0 +1,14 @@
+; please #include this file in the Csound Score section if it is not already
+; include a list of macros containing pathnames to your .wav or .aiff wavetable files.
+; An example: (only uncomment the next line - remove its semicolon)
+
+;#define Vir66 #C:/Users/myName/Wavetables/AccessWavetables-n66.wav#
+
+;The raw audio file so linked, is read in 2048-sample segments to obtain the 100 different waveforms (single-cycle).
+;Each waveform therefore must be written on the first 2048 samples of the .wav or .aiff file.
+;If it is a multichannel (stereo) file, the first 2048 sample-frames (but only the first channel will be read).
+;This is similar to the file used as a wavetable for well-known VST wavetable synths.
+;This file does not need only contain 1 file macro. Feel free to add a list and separate them with newlines.
+;Only the macro $Vir66 is currently used in prfcon.csd. But this can easily be changed by modifying the code
+;contained in prfcon.csd before Csound-running it. In this way any arbitrary wavetable can be auditioned - as long
+;as it is in the proper format.

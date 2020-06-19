@@ -52,7 +52,8 @@ aDisp   =       aOut1*600               ;rescale output to look better in spectr
 
 <CsScore>
 ;list of macros representing file paths for samples
-#include "C:/Users/17819/Samp/Samp2.txt"
+;must be in the same directory unless INCDIR environmental variable is set
+#include "Samp2.txt"
 
 ;causes Csound to run for about 7000 years...
 f0 z

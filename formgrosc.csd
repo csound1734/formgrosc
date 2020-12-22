@@ -2,13 +2,15 @@
 <Cabbage>
 form caption("CabbageGUI") size(800, 300), colour(58, 110, 82), pluginid("def1") style("modern") 
 keyboard bounds(10, 158, 381, 95) keypressbaseoctave(4)
-rslider bounds(10, 90, 60, 60) range(-64, 64, 0, 1, 0.005) channel("formant_shift") text("F-scale - gran")
-rslider bounds(70, 90, 60, 60) range(0, 12, 0, 1, 0.0005) channel("formant_spread") text("F-spread - gran")
-rslider bounds(328, 90, 60, 60) range(0, 99, 0, 1, 0.05) channel("wavetable_index") text("Index")
+rslider bounds(10, 90, 80, 60) range(-64, 64, 0, 1, 0.005) channel("formant_shift") text("F-shift")
+rslider bounds(70, 90, 80, 60) range(0, 12, 0, 1, 0.0005) channel("formant_spread") text("F-spread")
+rslider bounds(308, 90, 80, 60) range(0, 99, 0, 1, 0.05) channel("wavetable_index") text("Wavetable Index")
 signaldisplay bounds(10, 5, 381, 80) displaytype("spectroscope") signalvariable("aDisp") colour("lime") backgroundcolour("black")
-combobox bounds(193, 92, 80, 20) text("LifteredCepst", "TrueEnvelope") channel("pvswarp_meth")
-rslider bounds(193, 114, 79, 35) min(0) max(212) text("Lowest_Hz_Wazrped") channel("lowest-shift2")
 csoundoutput bounds(410,10,380,280)
+label bounds(170, 90, 120, 15) text("Grain mode") align("left") fontstyle("plain") size(14)
+label bounds(170, 122, 120, 15) text("Formant mode") align("left") fontstyle("plain")
+checkbox bounds(140, 90, 30, 30) radiogroup(1) channel("grain_mode")
+checkbox bounds(140, 122, 30, 30) radiogroup(1) channel("formant_mode")
 </Cabbage>
 <CsoundSynthesizer>
 <CsOptions>
@@ -18,8 +20,8 @@ csoundoutput bounds(410,10,380,280)
 ;       in an attempt to reduce latency without causing dropouts (glitches). However, the success of
 ;       this is system dependent. If you experience problems with latency or dropouts, you
 ;       may need to change these options and/or change ksmps (below).
--b16    ;software buffer. Should be a negative power of two of ksmps
--B1024  ;hardware buffer. should be a power of two.
+-b16    ;-b: software buffer (# of samples). Should be a negative power of two of ksmps
+-B1024  ;-B: hardware buffer (# of samples). should be a power of two.
 ; Documentation about optimizing buffer settings: http://www.csounds.com/manual/html/UsingOptimizing.html
 
 </CsOptions>
@@ -28,32 +30,45 @@ sr = 44100
 ksmps = 32 
 nchnls = 2
 0dbfs = 1
+alwayson 100
 
- opcode formgrosc, a, kkiiOO
-kcps, kform, iwavendxfn, iwaveresfn, kwavendx, kspread xin
-kband = abs(kform*4)
-kform = kcps*semitone(kform)
-kris = 0.25/kcps
-kdec = kris
-kdur = 1.25/kcps
-aspread = semitone(oscil(kspread, kcps/2, 35))
-ftmorf int(kwavendx), iwavendxfn, iwaveresfn
-aOut1   fof     1, kcps, kform*aspread, 0, kband, kris, kdur, kdec, 10000, iwaveresfn, 33, 100    
-xout aOut1
+zakinit 4, 4                           ;initialize zak patchbay (z-space)
+
+ opcode formgrosc, a, ikiiiOO           ;the opcode that does all the synthesis
+icps, kform, imode, iwavendxfn, iwaveresfn, kwavendx, kspread xin ;input parameters
+kband = abs(kform*4)                   ;grain env. gets more extreme as kform increases
+iform_base = (imode==0 ? cpspch(7) : icps) ;mode setting decides how formant gets calculated
+kform = iform_base*semitone(kform)     ;convert kform from semitones to Hz
+iris = 0.25/icps                       ;attack time of grain env. (skirtwidth of formants)
+idec = iris                            ;decay time of grain env.
+idur = 1.25/icps                       ;duration of each grain (grains slightly overlap)
+aspread = semitone(oscil(kspread, icps/2, 35)) ;lfo which implements f-spread
+ftmorf int(kwavendx), iwavendxfn, iwaveresfn ;interpolate between the different waveforms
+aOut1   fof     1, icps, kform*aspread, 0, kband, iris, idur, idec, 10000, iwaveresfn, 33, 100    
+xout aOut1                             ;output signal
  endop
 
 ;instrument will be triggered by keyboard widget
-        instr   100
+        instr   1
+imode   zir     0                       ;retrieve mode setting from z-space *at i-time only*
 kEnv    madsr   0.001, 0, 1, .005       ;generate adsr envelope (release triggered by noteoff)
 kEnv    *=      ampdbfs(-42)            ;gain
 kform   chnget  "formant_shift"         ;get f-shift from GUI (actually controls formant SCALING)
 kspread chnget  "formant_spread"        ;get f-spread from GUI
 kwtndx  chnget  "wavetable_index"       ;get wavetable index from GUI
-kform   portk   kform, .01              ;smooth control signal
-aOut1 formgrosc p5, kform, 98, 99, kwtndx, kspread
+kform   portk   kform, .002             ;smooth control signal
+aOut1 formgrosc p5, kform, imode, 98, 99, kwtndx, kspread
 aOut1 *= kEnv 
-        outs    aOut1, aOut1            ;output
-aDisp   =       aOut1*600               ;rescale output to look better in spectroscope
+        zawm    aOut1, 0 ;send audio signal to z-space
+        endin
+        
+        instr 100
+kmode   chnget  "grain_mode"             ;get oscillator mode from GUI (0=formant, 1=grain)
+        zkw     kmode, 0                ;send oscillator mode setting to z-space
+ain     zar     0                       ;retrieve audio signal from z-space
+        zacl    0, 0                    ;clear z-variable #0. otherwise audio will blow up
+        outs    ain, ain                ;output
+aDisp   =       ain*600                 ;rescale output to look better in spectroscope
         dispfft aDisp, .05, 2048        ;analyze spectrum and send to GUI for display
         endin
         
@@ -66,8 +81,6 @@ f0 z
 
 ;sigmoid rise (grain attack envelope)
 f33 0 16384 -19 .5 .5 270 .5 
-
-f34 0 16384 10 1 ;sine
 
 ;bipolar square (for f-spread)
 f35 0 16384 -7 -1 8192 -1 0 1 8192 1 
@@ -84,7 +97,7 @@ f99 0 2048 -2 0 ;buffer
 ;       line below to have an absolute path, your exported program or plugin will not work.
 {100 t
 ;NOTE: The file name in the line below must be altered in order to select a different wavetable.
-f [100+$t] 0 2048 1 "AC_Virus_TI2_Wavetables/ACVSTI Sundial 1.wav" [$t*2048/44100] 0 1 ;load a waveform
+f [100+$t] 0 2048 1 "AC_Virus_TI2_Wavetables/ACVSTI Sundial 2.wav" [$t*2048/44100] 0 1 ;load a waveform
 ;Future releases should implement a feature allowing the user to change wavetables in real time.
 } ;end of loop
 

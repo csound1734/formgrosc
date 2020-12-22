@@ -13,9 +13,13 @@ formant grain oscillator cabbage
 * if you have problems with latency or dropouts (audio glitching) you may need to change the software and hardware buffer sizes. See the comments in the \<CsOptions\> section. Removing the -b and -B flags entirely may be a good way to go too, as Csound will then default to system-specific defaults that may be "good enough"
 
 ## Changing wavetables
-In the real Virus synth, users can modulate between wavetables in-real time, in addition to being able to modulate the wavetable index to select different single-cycle waveforms ("frames") from within a given wavetable. 
-In this synth, you can modulate the wavetable index to select the different single-cycle waveforms in real-time, but you are limited to a single wavetable. By default that wavetable is "Sundial 2". However, you can change the code to change what wavetable you are using. This is achieved by altering the same line of code as in the previous section, i.e. the line that includes a path to the wavetable file. For example, if you replace the text "ACVSTI Sundial 2.wav" with "ACVSTI Fibonasty.wav", the synth will use the Fibonasty wavetable. 
+In the real Virus synth, users can modulate between wavetables in-real time, in addition to being able to modulate the wavetable index to select different single-cycle waveforms ("frames") from within a given wavetable. In this synth, you can modulate the wavetable index to select the different single-cycle waveforms in real-time, but you are limited to a single wavetable. By default that wavetable is "Sundial 2". 
+
+However, if you want to change what wavetable you are using, you can do this by altering the code. This is achieved by altering the same line of code as in the previous section, i.e. the line that includes a path to the wavetable file. For example, if you replace the text "ACVSTI Sundial 2.wav" with "ACVSTI Fibonasty.wav", the synth will use the Fibonasty wavetable instead of the Sundial 2 wavetable. 
+
 Eventually, I will implement a feature that allows the user to avoid the inconvenience and select different wavetables on the fly in addition to selecting different frames from within a wavetable.
+
+Another thing to note is that for now, the synth assumes that the wavetable contains only 100 different frames. If the wavetable contains more than 100 frames, only the first 100 frames will be used, and the rest will not be available. Note that if you use a wavetable with *less* than 100 frames, this will probably cause Csound to crash. All of the included Virus wavetables have at least 100 frames, but if you import your own wavetables, beware. Of course, it's not too difficult to accomodate a wavetable with less than 100 frames, but it requires a couple of alterations to the code.
 
 ## Disclaimer
 This is not intended to be a full-fledged synth for professional use. It is only a proof-of-concept demonstrating my attempt to reverse-engineer the Virus grain/formant oscillators. It is lacking many features that are needed to make the synth useable for actual audio production - most notably, ADSR envelope controls. I hope to add such features in future releases.

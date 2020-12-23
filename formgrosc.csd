@@ -36,7 +36,7 @@ zakinit 4, 4                           ;initialize zak patchbay (z-space)
 
  opcode formgrosc, a, ikiiiOO           ;the opcode that does all the synthesis
 icps, kform, imode, iwavendxfn, iwaveresfn, kwavendx, kspread xin ;input parameters
-kband = abs(kform*4)                   ;grain env. gets more extreme as kform increases
+kband = abs(kform*12)                   ;grain env. gets more extreme as kform increases
 iform_base = (imode==0 ? cpspch(7) : icps) ;mode setting decides how formant gets calculated
 kform = iform_base*semitone(kform)     ;convert kform from semitones to Hz
 iris = 0.25/icps                       ;attack time of grain env. (skirtwidth of formants)
@@ -67,6 +67,7 @@ kmode   chnget  "grain_mode"             ;get oscillator mode from GUI (0=forman
         zkw     kmode, 0                ;send oscillator mode setting to z-space
 ain     zar     0                       ;retrieve audio signal from z-space
         zacl    0, 0                    ;clear z-variable #0. otherwise audio will blow up
+ain     limit   ain, -0dbfs, 0dbfs      ;limit the signal just in case - don't blow out speakers/ears
         outs    ain, ain                ;output
 aDisp   =       ain*600                 ;rescale output to look better in spectroscope
         dispfft aDisp, .05, 2048        ;analyze spectrum and send to GUI for display

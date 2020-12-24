@@ -13,7 +13,7 @@ iform_base = (imode==0 ? cpspch(7) : icps) ;mode setting decides how formant get
 kform = iform_base*semitone(kform)     ;convert kform from semitones to Hz
 iris = 0.25/icps                       ;attack time of grain env. (skirtwidth of formants)
 idec = iris                            ;decay time of grain env.
-idur = 1.25/icps                       ;duration of each grain (grains slightly overlap)
+idur = 5/icps                       ;duration of each grain (grains slightly overlap)
 aspread = semitone(oscil(kspread, icps/2, 35)) ;lfo which implements f-spread
 ftmorf int(kwavendx), iwavendxfn, iwaveresfn ;interpolate between the different waveforms
 aOut1   fof     1, icps, kform*aspread, 0, kband, iris, idur, idec, 10000, iwaveresfn, 33, 100    
@@ -45,8 +45,8 @@ ires ftload_virus_waves 100        ;load the waveforms starting at f-table 100
 icps = cpspch(7.07)                ;pitch (fundamental) = low G
 itempo = 4*144/60                  ;speed of random lfos - 16th notes @ 144bpm
 kform randomh 6, 25, itempo        ;random f-shift between +6 and +25
-kspread randomh 1, 12, itempo      ;random f-spread between 1 and 12
-kwave line 0, p3, 99          ;sweep the wavetable index over duration of note
+kspread init 6                     ;f-spread
+kwave randomh 0, 99, itempo         ;random wavetable index
 ares formgrosc icps, kform, 1, giftmorf, gibuf, kwave, kspread
 aenv adsr 0.01, 0, 1, 0.01         ;declicking envelope
 ares *= aenv*ampdbfs(-28)          ;formgrosc tends to run pretty loud
@@ -57,4 +57,5 @@ out ares
 i 1 0 12 ;play a note with instrument 1 for 12 seconds
 </CsScore>
 </CsoundSynthesizer>
+
 

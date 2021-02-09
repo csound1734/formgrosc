@@ -1,6 +1,6 @@
-
+d
 <Cabbage>
-form caption("CabbageGUI") size(800, 300), colour(58, 110, 82), pluginid("def1") style("modern") 
+form caption("formgrosc") size(800, 300), colour(58, 110, 82), pluginid("def1") style("modern") 
 keyboard bounds(10, 200, 381, 95) keypressbaseoctave(4)
 hslider bounds(260, 150, 150, 40) text("Gain") channel("Gain") range("-48, 12, 0")
 nslider bounds(320, 180, 60, 20) channel("Gain") range("-48, 12, 0")

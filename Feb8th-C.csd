@@ -1,3 +1,8 @@
+/*
+  * First time using the directory opcode to get an array
+  * of filenames by searching a directory.
+*/
+
 <Cabbage>
 form caption("Untitled") size(1050, 400), colour(255, 185, 150), pluginid("def1")
 texteditor wrap(1) bounds(0, 0, 1050, 100) colour(3,160,250) fontcolour("white") channel("textedit") ;file("~/Downloads/jimscsoundnotebook/Feb8th.txt")
